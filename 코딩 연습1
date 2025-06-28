@@ -1,0 +1,56 @@
+# [1] 라이브러리 불러오기
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.metrics import mean_absolute_error, r2_score
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# [2] CSV 파일 불러오기
+df = pd.read_csv("card_gyeonggi_202503 2.csv")  # 정확한 파일명 사용!
+
+# [3] 컬럼명 정리 (한글 그대로)
+df.columns = ['날짜', '업종', '성별', '연령대', '요일', '매출금액', '매출건수']
+
+# [4] 사용할 열만 추출
+data = df[['성별', '요일', '매출금액']].dropna()
+
+# [5] 입력(X), 출력(y) 나누기
+X = pd.get_dummies(data[['성별', '요일']])  # 원핫 인코딩
+y = data['매출금액']
+
+# [6] 학습/테스트 분리
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# [7] 모델 학습 - 선형 회귀
+lr = LinearRegression()
+lr.fit(X_train, y_train)
+lr_pred = lr.predict(X_test)
+
+# [8] 모델 학습 - KNN 회귀
+knn = KNeighborsRegressor()
+knn.fit(X_train, y_train)
+knn_pred = knn.predict(X_test)
+
+# [9] 모델 성능 비교 출력
+print("🔹 선형 회귀")
+print("R²:", r2_score(y_test, lr_pred))
+print("MAE:", mean_absolute_error(y_test, lr_pred))
+
+print("\n🔹 KNN 회귀")
+print("R²:", r2_score(y_test, knn_pred))
+print("MAE:", mean_absolute_error(y_test, knn_pred))
+
+# [10] 요일별 평균 매출금액 시각화 (영어 라벨)
+plt.figure(figsize=(10,6))
+sns.barplot(x='요일', y='매출금액', data=data, estimator=np.mean, ci=None)
+
+plt.title("Average Sales Amount by Day of Week")
+plt.xlabel("Day of Week (1 = Mon, ..., 7 = Sun)")
+plt.ylabel("Average Sales Amount (KRW)")
+plt.tight_layout()
+plt.show()
