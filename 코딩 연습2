@@ -1,0 +1,15 @@
+import os
+print(os.listdir())
+
+import pandas as pd
+
+# 데이터 재불러오기
+df = pd.read_csv("card_gyeonggi_202503 2.csv")
+
+# 컬럼명 정리
+df.columns = ['날짜', '업종', '성별', '연령대', '요일', '매출금액', '매출건수']
+
+# 상위 10개 업종 추출
+top10_categories = df.groupby('업종')['매출금액'].sum().nlargest(10)
+top10_categories
+
