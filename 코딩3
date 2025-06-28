@@ -1,0 +1,33 @@
+# [1] 라이브러리 불러오기
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# [2] 데이터 불러오기 (파일명을 업로드한 파일명에 맞게 수정)
+df = pd.read_csv("card_gyeonggi_202503 2.csv")
+
+# [3] 컬럼명 정리
+df.columns = ['날짜', '업종', '성별', '연령대', '요일', '매출금액', '매출건수']
+
+# 연령대 이상치 제거 (2~6만 유지)
+df = df[df['연령대'].isin([2, 3, 4, 5, 6])]
+
+# [4] 연령대별 업종별 매출금액 합계 계산
+grouped = df.groupby(['연령대', '업종'])['매출금액'].sum().reset_index()
+
+# [5] 전체 매출 기준 상위 10개 업종 추출
+top10 = grouped.groupby('업종')['매출금액'].sum().nlargest(10).index.tolist()
+
+# [6] 상위 10개 업종에 해당하는 데이터만 필터링
+filtered = grouped[grouped['업종'].isin(top10)]
+
+# [7] 시각화
+plt.figure(figsize=(12, 8))
+sns.barplot(data=filtered, x='연령대', y='매출금액', hue='업종')
+
+plt.title("Top 10 Spending Categories by Age Group")
+plt.xlabel("Age Group (e.g. 2 = 20s)")
+plt.ylabel("Total Spending (KRW)")
+plt.legend(title="Category", bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.tight_layout()
+plt.show()
