@@ -1,0 +1,76 @@
+v2.0 raw
+e0 04 e4 08 21 d0 40 f0 07
+
+; filename: student_id.asm
+; 설명: DWORD 정수형으로 저장된 학번의 각 자릿수를 DIV 명령어를 사용하여 분리하고 합계를 구하는 프로그램 (x64 MASM)
+
+EXTERN printf : PROC
+
+.DATA
+; 4-byte 정수형(DWORD) 변수에 학번 저장.
+studentID_Int DWORD 20214248
+
+; 출력 포맷 문자열 정의: 학번(숫자)와 자릿수 합계를 출력
+msgResult BYTE "학번(숫자): %d, 자릿수 합계: %d", 10, 0 ; 10은 개행 문자(LF), 0은 문자열 종료(NULL)
+
+; 나눗셈을 위한 제수(Divisor) 10을 DWORD 형태로 정의
+divisor DWORD 10 
+.CODE
+main PROC
+; 함수 호출 규약에 따라 스택 공간 확보 (Shadow Space 포함)
+SUB RSP, 40
+
+; --- 초기 설정 및 변수 준비 ---
+
+; RAX 레지스터에 학번 정수값 로드 (반복문에서 몫/피제수(dividend)로 사용)
+MOV EAX, studentID_Int 
+
+; R10 레지스터에 원본 학번을 백업. (결과 출력 시 %d 인자로 사용)
+MOV R10D, EAX
+
+; R9 레지스터를 합계 누적 변수로 사용하고 0으로 초기화
+XOR R9, R9 
+
+; RBX 레지스터에 제수(10) 로드. (DIV 명령어의 피연산자로 사용)
+MOV EBX, divisor 
+
+; --- 자릿수 합계 계산 루프 ---
+LoopStart:
+; 몫(RAX)이 0인지 확인하여 반복 종료 조건을 검사
+CMP RAX, 0
+JE LoopEnd
+
+; [중요] DIV 연산 전에 RDX 레지스터를 반드시 0으로 초기화해야 합니다.
+XOR RDX, RDX 
+
+; DIV RBX (RAX / 10) 수행
+;   - 몫(Quotient)은 RAX에 저장됨
+;   - 나머지(Remainder)는 RDX에 저장됨 (구해진 자릿수)
+DIV RBX 
+
+; 나머지(RDX)에 저장된 자릿수를 합계(R9)에 누적
+ADD R9, RDX 
+
+; 몫(RAX)이 0이 될 때까지 반복
+JMP LoopStart 
+LoopEnd:
+; --- 결과 출력 준비 (printf 호출 규약: RCX, RDX, R8) ---
+
+; RCX: 출력 포맷 문자열 주소
+LEA RCX, msgResult 
+
+; RDX: 출력될 학번 (백업해 둔 R10D 사용)
+MOV EDX, R10D 
+
+; R8: 계산된 자릿수 합계 (R9 사용)
+MOV R8, R9 
+
+; printf 함수 호출
+CALL printf
+
+; --- 프로그램 종료 ---
+XOR RAX, RAX 
+ADD RSP, 40 
+RET
+main ENDP
+END
