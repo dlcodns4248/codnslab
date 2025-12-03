@@ -1,0 +1,52 @@
+;
+; Program to calculate Z = (B + C) * A
+; (1-Address, Accumulator-based method)
+;
+; 학번 (...248) 기준
+; A = 8, B = 4, C = 2
+; Base Address = 3000H + 8 = 3008H
+
+JMP START
+
+; 코드 시작 주소
+ORG 2000H
+
+START:
+; --- 0. 데이터 초기화 ---
+; 학번 끝 3자리: A=8, B=4, C=2
+; 저장 시작 주소: 3000H + (학번 끝자리 8) = 3008H
+
+MVI A, 04H ; B = 4
+STA 3008H ; B 저장 (기준주소 + 0)
+
+MVI A, 02H ; C = 2
+STA 3009H ; C 저장 (기준주소 + 1)
+
+MVI A, 08H ; A = 8
+STA 300AH ; A 저장 (기준주소 + 2)
+
+; --- 1. (B + C) 계산 ---
+LDA 3008H ; A ← [B] (A = 4)
+LXI H, 3009H ; HL ← C 주소 (3009H)
+ADD M ; A ← A + [C] (A = 4 + 2 = 6)
+
+; --- 2. 곱셈 준비 ---
+MOV E, A ; E ← (B+C) (E = 6)
+MVI D, 00H ; D ← 0 (DE = 0006H)
+LDA 300AH ; A ← [A] (A = 8)
+MOV C, A ; C ← A (루프 카운터 C = 8)
+
+; --- 3. 곱셈 루프 (HL = DE * C) ---
+LXI H, 0000H ; HL ← 0 (결과값 누적)
+
+MULLOOP:
+DAD D ; HL ← HL + DE (HL = HL + 6)
+DCR C ; C ← C - 1
+JNZ MULLOOP ; C가 0이 아니면 루프 반복 (8번 반복)
+; HL = 6 * 8 = 48 (30H)
+
+; --- 4. 결과 저장 ---
+; 결과 저장 주소 = 300BH ~ 300CH
+SHLD 300BH ; [300BH] ← L (30H), [300CH] ← H (00H)
+
+HLT
