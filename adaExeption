@@ -1,0 +1,44 @@
+with Ada.Text_IO;
+with Ada.Integer_Text_IO;
+use Ada.Text_IO;
+use Ada.Integer_Text_IO;
+
+procedure Triple_Product_Ada is
+Num1, Num2, Num3 : Integer;
+Product : Integer;
+begin
+Put_Line("세 개의 정수를 입력하세요 (음수는 허용하지 않음):");
+
+-- 입력부
+begin
+Put("첫 번째 정수: ");
+Get(Num1);
+
+  Put("두 번째 정수: ");
+  Get(Num2);
+  
+  Put("세 번째 정수: ");
+  Get(Num3);
+  
+  -- 1. 음수 입력 체크
+  if Num1 < 0 or Num2 < 0 or Num3 < 0 then
+     -- 음수 입력은 명시적으로 예외를 발생시킵니다.
+     raise Constraint_Error with "오류: 입력은 0 또는 양의 정수여야 합니다.";
+  end if;
+  
+  -- 2. 곱셈 및 오버플로 체크
+  -- 곱셈 중 오버플로 발생 시 Ada가 자동으로 Constraint_Error를 발생시킵니다.
+  Product := Num1 * Num2 * Num3;
+  
+  Put_Line("세 정수의 곱: " & Integer'Image(Product));
+exception
+when Constraint_Error =>
+-- 입력값(음수/범위 초과) 오류 또는 곱셈 오버플로 처리
+Put_Line("오류: 입력값 범위 오류 또는 곱셈 결과 오버플로 발생.");
+Put_Line("프로그램을 종료합니다.");
+
+  when others =>
+     Put_Line("예기치 않은 오류가 발생했습니다.");
+     Put_Line("프로그램을 종료합니다.");
+end;
+end Triple_Product_Ada;
