@@ -1,0 +1,54 @@
+import java.util.InputMismatchException;
+import java.util.Scanner;
+
+public class TripleProductJava {
+
+public static void main(String[] args) {
+    Scanner scanner = new Scanner(System.in);
+    int num1 = 0, num2 = 0, num3 = 0;
+
+    System.out.println("세 개의 정수를 입력하세요 (음수는 허용하지 않음):");
+
+    try {
+        // 입력
+        System.out.print("첫 번째 정수: ");
+        num1 = scanner.nextInt();
+        System.out.print("두 번째 정수: ");
+        num2 = scanner.nextInt();
+        System.out.print("세 번째 정수: ");
+        num3 = scanner.nextInt();
+
+        // 1. 음수 입력 체크
+        if (num1 < 0 || num2 < 0 || num3 < 0) {
+            // 부적절한 인자값으로 처리하여 예외 발생
+            throw new IllegalArgumentException("음수 입력 오류: 입력은 0 또는 양의 정수여야 합니다.");
+        }
+
+        // 2. 곱셈 및 오버플로 체크 (Math.multiplyExact() 사용)
+        // 첫 번째 곱: num1 * num2
+        int tempProduct = Math.multiplyExact(num1, num2);
+        
+        // 두 번째 곱: (num1 * num2) * num3
+        int finalProduct = Math.multiplyExact(tempProduct, num3);
+
+        System.out.println("세 정수의 곱: " + finalProduct);
+
+    } catch (InputMismatchException e) {
+        // 정수 외 다른 형식 입력 시
+        System.err.println("오류: 잘못된 입력 형식입니다. 정수를 입력해주세요.");
+        System.err.println("프로그램을 종료합니다.");
+    } catch (IllegalArgumentException e) {
+        // 음수 입력 시
+        System.err.println("오류: " + e.getMessage());
+        System.err.println("프로그램을 종료합니다.");
+    } catch (ArithmeticException e) {
+        // 오버플로 발생 시
+        System.err.println("오류: 곱셈 결과 오버플로가 발생했습니다.");
+        System.err.println("프로그램을 종료합니다.");
+    } finally {
+        if (scanner != null) {
+            scanner.close();
+        }
+    }
+}
+}
